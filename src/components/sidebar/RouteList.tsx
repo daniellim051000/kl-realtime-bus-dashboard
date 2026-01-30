@@ -9,7 +9,7 @@ interface RouteListProps {
   routes: GTFSRoute[];
   vehicles: Vehicle[];
   searchQuery: string;
-  selectedRouteId: string | null;
+  selectedRouteIds: Set<string>;
   onRouteClick: (routeId: string) => void;
 }
 
@@ -17,7 +17,7 @@ export default function RouteList({
   routes,
   vehicles,
   searchQuery,
-  selectedRouteId,
+  selectedRouteIds,
   onRouteClick,
 }: RouteListProps) {
   const busCountByRoute = useMemo(() => {
@@ -64,7 +64,7 @@ export default function RouteList({
           key={route.route_id}
           route={route}
           activeBusCount={busCountByRoute.get(route.route_id) ?? 0}
-          isSelected={route.route_id === selectedRouteId}
+          isSelected={selectedRouteIds.has(route.route_id)}
           onClick={onRouteClick}
         />
       ))}

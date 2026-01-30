@@ -3,10 +3,10 @@ import type { Vehicle } from "@/types/vehicle";
 
 export function useFilteredVehicles(
   vehicles: Vehicle[],
-  selectedRouteId: string | null
+  selectedRouteIds: Set<string>
 ) {
   return useMemo(() => {
-    if (!selectedRouteId) return vehicles;
-    return vehicles.filter((v) => v.routeId === selectedRouteId);
-  }, [vehicles, selectedRouteId]);
+    if (selectedRouteIds.size === 0) return vehicles;
+    return vehicles.filter((v) => selectedRouteIds.has(v.routeId));
+  }, [vehicles, selectedRouteIds]);
 }

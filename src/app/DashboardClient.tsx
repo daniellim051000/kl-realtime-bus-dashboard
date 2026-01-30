@@ -25,27 +25,27 @@ export default function DashboardClient() {
   const { trips } = useTrips();
   const { shapes } = useShapes();
 
-  const filteredVehicles = useFilteredVehicles(vehicles, state.selectedRouteId);
+  const filteredVehicles = useFilteredVehicles(vehicles, state.selectedRouteIds);
   const arrivals = useEstimatedArrivals(state.selectedStopId, vehicles, trips);
-  const { routeStopIds } = useRouteStopIds(state.selectedRouteId);
+  const { routeStopIds } = useRouteStopIds(state.selectedRouteIds);
 
-  // Get stops for selected route
+  // Get stops for selected routes
   const routeStops = useMemo(() => {
-    if (!state.selectedRouteId || routeStopIds.size === 0) return [];
+    if (state.selectedRouteIds.size === 0 || routeStopIds.size === 0) return [];
     return stops.filter((s) => routeStopIds.has(s.stop_id));
-  }, [state.selectedRouteId, stops, routeStopIds]);
+  }, [state.selectedRouteIds, stops, routeStopIds]);
 
-  // Get shape IDs for selected route
+  // Get shape IDs for selected routes
   const shapeIds = useMemo(() => {
-    if (!state.selectedRouteId) return [];
+    if (state.selectedRouteIds.size === 0) return [];
     return [
       ...new Set(
         trips
-          .filter((t) => t.route_id === state.selectedRouteId && t.shape_id)
+          .filter((t) => state.selectedRouteIds.has(t.route_id) && t.shape_id)
           .map((t) => t.shape_id!)
       ),
     ];
-  }, [state.selectedRouteId, trips]);
+  }, [state.selectedRouteIds, trips]);
 
   const selectedVehicle = useMemo(
     () => vehicles.find((v) => v.id === state.selectedVehicleId) ?? null,
@@ -57,15 +57,13 @@ export default function DashboardClient() {
     [stops, state.selectedStopId]
   );
 
-  const handleRouteClick = useCallback(
-    (routeId: string) => {
-      dispatch({
-        type: "SELECT_ROUTE",
-        routeId: routeId === state.selectedRouteId ? null : routeId,
-      });
-    },
-    [state.selectedRouteId]
-  );
+  const handleRouteClick = useCallback((routeId: string) => {
+    dispatch({ type: "TOGGLE_ROUTE", routeId });
+  }, []);
+
+  const handleClearRoutes = useCallback(() => {
+    dispatch({ type: "CLEAR_ROUTES" });
+  }, []);
 
   const handleVehicleClick = useCallback((vehicleId: string) => {
     dispatch({ type: "SELECT_VEHICLE", vehicleId });
@@ -99,7 +97,7 @@ export default function DashboardClient() {
           view={state.sidebarView}
           routes={routes}
           vehicles={vehicles}
-          selectedRouteId={state.selectedRouteId}
+          selectedRouteIds={state.selectedRouteIds}
           selectedVehicle={selectedVehicle}
           selectedStop={selectedStop}
           arrivals={arrivals}
@@ -107,6 +105,7 @@ export default function DashboardClient() {
           routesLoading={routesLoading}
           onSearchChange={handleSearchChange}
           onRouteClick={handleRouteClick}
+          onClearRoutes={handleClearRoutes}
           onBack={handleBack}
         />
       </div>
@@ -126,12 +125,12 @@ export default function DashboardClient() {
 
         <MapWrapper
           vehicles={filteredVehicles}
-          stops={state.selectedRouteId ? routeStops : []}
+          stops={state.selectedRouteIds.size > 0 ? routeStops : []}
           shapes={shapes}
           shapeIds={shapeIds}
           selectedVehicleId={state.selectedVehicleId}
           selectedStopId={state.selectedStopId}
-          showStops={!!state.selectedRouteId}
+          showStops={state.selectedRouteIds.size > 0}
           onVehicleClick={handleVehicleClick}
           onStopClick={handleStopClick}
         />

@@ -1,7 +1,7 @@
 import type { DashboardState, DashboardAction } from "@/types/ui";
 
 export const initialDashboardState: DashboardState = {
-  selectedRouteId: null,
+  selectedRouteIds: new Set<string>(),
   selectedVehicleId: null,
   selectedStopId: null,
   searchQuery: "",
@@ -13,10 +13,25 @@ export function dashboardReducer(
   action: DashboardAction
 ): DashboardState {
   switch (action.type) {
-    case "SELECT_ROUTE":
+    case "TOGGLE_ROUTE": {
+      const next = new Set(state.selectedRouteIds);
+      if (next.has(action.routeId)) {
+        next.delete(action.routeId);
+      } else {
+        next.add(action.routeId);
+      }
       return {
         ...state,
-        selectedRouteId: action.routeId,
+        selectedRouteIds: next,
+        selectedVehicleId: null,
+        selectedStopId: null,
+        sidebarView: "routes",
+      };
+    }
+    case "CLEAR_ROUTES":
+      return {
+        ...state,
+        selectedRouteIds: new Set<string>(),
         selectedVehicleId: null,
         selectedStopId: null,
         sidebarView: "routes",

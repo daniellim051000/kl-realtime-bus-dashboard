@@ -1,7 +1,7 @@
 export type SidebarView = "routes" | "busDetail" | "stopDetail";
 
 export interface DashboardState {
-  selectedRouteId: string | null;
+  selectedRouteIds: Set<string>;
   selectedVehicleId: string | null;
   selectedStopId: string | null;
   searchQuery: string;
@@ -9,7 +9,8 @@ export interface DashboardState {
 }
 
 export type DashboardAction =
-  | { type: "SELECT_ROUTE"; routeId: string | null }
+  | { type: "TOGGLE_ROUTE"; routeId: string }
+  | { type: "CLEAR_ROUTES" }
   | { type: "SELECT_VEHICLE"; vehicleId: string | null }
   | { type: "SELECT_STOP"; stopId: string | null }
   | { type: "SET_SEARCH"; query: string }

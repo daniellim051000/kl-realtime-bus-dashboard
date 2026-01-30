@@ -13,7 +13,7 @@ interface SidebarProps {
   view: SidebarView;
   routes: GTFSRoute[];
   vehicles: Vehicle[];
-  selectedRouteId: string | null;
+  selectedRouteIds: Set<string>;
   selectedVehicle: Vehicle | null;
   selectedStop: GTFSStop | null;
   arrivals: ArrivalEstimate[];
@@ -21,6 +21,7 @@ interface SidebarProps {
   routesLoading: boolean;
   onSearchChange: (query: string) => void;
   onRouteClick: (routeId: string) => void;
+  onClearRoutes: () => void;
   onBack: () => void;
 }
 
@@ -28,7 +29,7 @@ export default function Sidebar({
   view,
   routes,
   vehicles,
-  selectedRouteId,
+  selectedRouteIds,
   selectedVehicle,
   selectedStop,
   arrivals,
@@ -36,6 +37,7 @@ export default function Sidebar({
   routesLoading,
   onSearchChange,
   onRouteClick,
+  onClearRoutes,
   onBack,
 }: SidebarProps) {
   return (
@@ -68,19 +70,19 @@ export default function Sidebar({
             routes={routes}
             vehicles={vehicles}
             searchQuery={searchQuery}
-            selectedRouteId={selectedRouteId}
+            selectedRouteIds={selectedRouteIds}
             onRouteClick={onRouteClick}
           />
         )}
       </div>
 
-      {selectedRouteId && view === "routes" && (
+      {selectedRouteIds.size > 0 && view === "routes" && (
         <div className="border-t border-gray-200 bg-white px-4 py-2">
           <button
-            onClick={() => onRouteClick(selectedRouteId)}
+            onClick={onClearRoutes}
             className="w-full text-center text-sm text-blue-600 hover:underline"
           >
-            Clear route filter
+            Clear all ({selectedRouteIds.size} selected)
           </button>
         </div>
       )}

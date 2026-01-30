@@ -1,16 +1,23 @@
+import { useMemo } from "react";
 import useSWR from "swr";
 import type { GTFSStopTime } from "@/types/gtfs";
 
-export function useRouteStopIds(routeId: string | null) {
-  const { data, isLoading } = useSWR<GTFSStopTime[]>(
-    routeId ? `/api/static/stop-times?route_id=${routeId}` : null,
-    {
-      revalidateOnFocus: false,
-      revalidateIfStale: false,
-    }
-  );
+export function useRouteStopIds(routeIds: Set<string>) {
+  const swrKey = useMemo(() => {
+    if (routeIds.size === 0) return null;
+    const sorted = [...routeIds].sort().join(",");
+    return `/api/static/stop-times?route_ids=${sorted}`;
+  }, [routeIds]);
 
-  const routeStopIds = new Set(data?.map((st) => st.stop_id));
+  const { data, isLoading } = useSWR<GTFSStopTime[]>(swrKey, {
+    revalidateOnFocus: false,
+    revalidateIfStale: false,
+  });
+
+  const routeStopIds = useMemo(
+    () => new Set(data?.map((st) => st.stop_id)),
+    [data]
+  );
 
   return { routeStopIds, isLoading };
 }

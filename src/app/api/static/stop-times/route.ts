@@ -7,13 +7,24 @@ export async function GET(request: NextRequest) {
     const stopId = searchParams.get("stop_id");
     const tripId = searchParams.get("trip_id");
     const routeId = searchParams.get("route_id");
+    const routeIdsParam = searchParams.get("route_ids");
+
+    // Unify single route_id and comma-separated route_ids into one Set
+    const routeIdSet = new Set<string>();
+    if (routeId) routeIdSet.add(routeId);
+    if (routeIdsParam) {
+      for (const id of routeIdsParam.split(",")) {
+        const trimmed = id.trim();
+        if (trimmed) routeIdSet.add(trimmed);
+      }
+    }
 
     let stopTimes = await getStopTimes();
 
-    if (routeId) {
+    if (routeIdSet.size > 0) {
       const trips = await getTrips();
       const tripIds = new Set(
-        trips.filter((t) => t.route_id === routeId).map((t) => t.trip_id)
+        trips.filter((t) => routeIdSet.has(t.route_id)).map((t) => t.trip_id)
       );
       stopTimes = stopTimes.filter((st) => tripIds.has(st.trip_id));
     }
